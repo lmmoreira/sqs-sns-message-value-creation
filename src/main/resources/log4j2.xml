@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Properties>
+        <Property name="DEFAULT_PATTERN">%highlight{[%-5level]} %style{[%date{ISO8601}] [%t] [%c{1}]}{Magenta} %msg %mdc%n</Property>
+
+        <Property name="LOG_PATH">${sys:MICRO_SERVICE_HOME}/logs</Property>
+        
+        <Property name="LOG_JSON">${sys:LOG_PATH}/stdout.json</Property>
+        <Property name="LOG_JSON_GZIP">${sys:LOG_PATH}/stdout-%d{yyyy-MM-dd}-%i.json.gz</Property>
+
+        <Property name="LOG_FILE">${sys:LOG_PATH}/application.log</Property>
+        <Property name="LOG_FILE_GZIP">${sys:LOG_PATH}/application-%d{yyyy-MM-dd}-%i.log.gz</Property>
+
+        <Property name="ACCESS_LOG_FILE">${sys:LOG_PATH}/access.log</Property>
+        <Property name="ACCESS_LOG_FILE_ROTATE">${sys:LOG_PATH}/access-%d{yyyy-MM-dd}-%i.log.gz</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="CONSOLE" target="SYSTEM_OUT">
+            <PatternLayout pattern="${DEFAULT_PATTERN}"/>
+        </Console>
+
+        <RollingRandomAccessFile name="FILE" fileName="${sys:LOG_FILE}" filePattern="${sys:LOG_FILE_GZIP}">
+            <PatternLayout pattern="${DEFAULT_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="300 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingRandomAccessFile>
+
+        <RollingRandomAccessFile name="JSON" fileName="${sys:LOG_JSON}" filePattern="${sys:LOG_JSON_GZIP}">
+            <LogstashLayout prettyPrintEnabled="false" stackTraceEnabled="true"
+                            templateUri="classpath:CustomLogstashJsonEventLayoutV1.json"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="300 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="7"/>
+        </RollingRandomAccessFile>
+
+        <RollingRandomAccessFile name="ACCESS"
+                                 fileName="${sys:ACCESS_LOG_FILE}" filePattern="${sys:ACCESS_LOG_FILE_ROTATE}">
+            <PatternLayout pattern="${DEFAULT_PATTERN}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy
+                        size="300 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="7" />
+        </RollingRandomAccessFile>
+
+        <Async name="ASYNC" includeLocation="true">
+            <AppenderRef ref="FILE"/>
+            <AppenderRef ref="CONSOLE"/>
+            <AppenderRef ref="JSON"/>
+        </Async>
+
+        <Async name="ASYNC_ACCESS" includeLocation="true">
+            <AppenderRef ref="CONSOLE"/>
+            <AppenderRef ref="ACCESS" />
+        </Async>
+    </Appenders>
+
+    <Loggers>
+        <!-- Default log level -->
+        <Root level="INFO">
+            <AppenderRef ref="ASYNC"/>
+        </Root>
+
+        <!-- Package-specific log level -->
+        <AsyncLogger name="br.com.ccrs.logistics.fleet.order.acceptance" level="WARN"/>
+        <AsyncLogger name="com.ccrs" level="WARN"/>
+        <AsyncLogger name="org.springframework" level="WARN"/>
+        <AsyncLogger name="com.amazonaws" level="WARN"/>
+
+        <!-- Request and Response. TRACE level enables headers logging (unsafe logs) -->
+        <AsyncLogger name="com.ccrs.api.filters" level="DEBUG" additivity="false">
+            <AppenderRef ref="ASYNC_ACCESS" />
+        </AsyncLogger>
+    </Loggers>
+</Configuration>

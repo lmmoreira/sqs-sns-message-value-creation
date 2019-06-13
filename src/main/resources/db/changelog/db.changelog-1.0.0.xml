@@ -1,0 +1,188 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet author="lucas.abreu" id="TL-3440-1">
+        <createTable tableName="ORDER_DELIVERY">
+            <column autoIncrement="true" name="ID" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="ACCEPTED_DATE" type="TIMESTAMP"/>
+            <column name="CREATED_DATE" type="TIMESTAMP"/>
+            <column name="EXTERNAL_ID" type="VARCHAR(255)"/>
+            <column name="JSON" type="TEXT"/>
+            <column name="PAYMENT_TYPE" type="VARCHAR(255)"/>
+            <column name="STATUS" type="VARCHAR(255)"/>
+            <column name="REGION_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TRACKABLE_SOURCE_ID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="lucas.abreu" id="TL-3440-2">
+        <createTable tableName="ORDER_REJECT">
+            <column autoIncrement="true" name="ID" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="EXTERNAL_ID" type="VARCHAR(255)"/>
+            <column name="REASON" type="VARCHAR(255)"/>
+            <column name="REJECTED_DATE" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="lucas.abreu" id="TL-3440-3">
+        <createTable tableName="REGION">
+            <column autoIncrement="true" name="ID" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="KML" type="VARCHAR(255)"/>
+            <column name="REGION_UUID" type="CHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+            <column name="SATURATED" type="BOOLEAN" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SATURATED_OFFLINE_PAYMENT" type="BOOLEAN" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="OFFLINE_PAYMENT_ENABLED" type="BOOLEAN" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="VERSION" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="lucas.abreu" id="TL-3440-4">
+        <createTable tableName="TRACKABLE_SOURCE">
+            <column autoIncrement="true" name="ID" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="lucas.abreu" id="TL-3440-5">
+        <createIndex indexName="idx_order_delivery_region_id" tableName="ORDER_DELIVERY">
+            <column name="REGION_ID"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="lucas.abreu" id="TL-3440-6">
+        <createIndex indexName="idx_order_delivery_trackable_source_id" tableName="ORDER_DELIVERY">
+            <column name="TRACKABLE_SOURCE_ID"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="lucas.abreu" id="TL-3440-7">
+        <addForeignKeyConstraint baseColumnNames="REGION_ID" baseTableName="ORDER_DELIVERY"
+                                 constraintName="fk_order_delivery_region_id" deferrable="false"
+                                 referencedColumnNames="ID" referencedTableName="REGION"/>
+    </changeSet>
+
+    <changeSet author="lucas.abreu" id="TL-3440-8">
+        <addForeignKeyConstraint baseColumnNames="TRACKABLE_SOURCE_ID" baseTableName="ORDER_DELIVERY"
+                                 constraintName="fk_order_delivery_trackable_source_id" deferrable="false"
+                                 referencedColumnNames="ID" referencedTableName="TRACKABLE_SOURCE"/>
+    </changeSet>
+
+    <changeSet author="lucas.abreu" id="TL-3440-9">
+        <createIndex indexName="idx_region_region_uuid" tableName="REGION" unique="true">
+            <column name="REGION_UUID"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="leornado.moreira" id="TL-3801-1">
+        <addColumn tableName="REGION">
+            <column name="ACCEPTANCE_TOGGLE" type="BOOLEAN" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="lucas.abreu" id="TL-3422-1">
+        <addColumn tableName="ORDER_DELIVERY">
+            <column name="TENANT_IDENTIFIER" type="VARCHAR(255)"/>
+        </addColumn>
+        <addColumn tableName="ORDER_REJECT">
+            <column name="TENANT_IDENTIFIER" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="lucas.abreu" id="TL-3439-1">
+        <addColumn tableName="ORDER_DELIVERY">
+            <column name="ORDER_UUID" type="CHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="lucas.abreu" id="TL-3439-2">
+        <createIndex indexName="idx_order_delivery__order_uuid" tableName="ORDER_DELIVERY" unique="true">
+            <column name="ORDER_UUID"/>
+        </createIndex>
+    </changeSet>
+
+
+    <changeSet author="leonardo.moreira" id="TL-3471">
+        <dropNotNullConstraint columnDataType="BIGINT"
+                               columnName="REGION_ID"
+                               schemaName="public"
+                               tableName="ORDER_DELIVERY"/>
+    </changeSet>
+
+    <changeSet author="lucas.abreu" id="TL-3471-2">
+        <addUniqueConstraint columnNames="EXTERNAL_ID, TENANT_IDENTIFIER"
+                             constraintName="unique_order_delivery_external_id_tenant_identifier"
+                             tableName="ORDER_DELIVERY"/>
+    </changeSet>
+
+    <changeSet author="lucas.abreu" id="TL-3439-rename-index">
+        <dropIndex indexName="idx_order_delivery__order_uuid"
+                   tableName="ORDER_DELIVERY"/>
+        <createIndex indexName="idx_order_delivery_order_uuid" tableName="ORDER_DELIVERY" unique="true">
+            <column name="ORDER_UUID"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="alex.fabiano" id="TL-3471-fix-create-order">
+        <createIndex tableName="TRACKABLE_SOURCE" indexName="idx_trackable_source_name" unique="true">
+            <column name="NAME" />
+        </createIndex>
+        <insert tableName="TRACKABLE_SOURCE">
+            <column name="NAME" value="ccrs" />
+        </insert>
+    </changeSet>
+
+    <changeSet author="lucas.abreu" id="TL-4079">
+        <addColumn tableName="REGION">
+            <column name="CREATE_TOGGLE" type="BOOLEAN" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="lucas.abreu" id="TL-4080-1">
+        <createTable tableName="FEATURE_TOGGLE">
+            <column name="NAME" type="VARCHAR(50)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="TOGGLED" type="BOOLEAN" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="lucas.abreu" id="TL-4080-2">
+        <insert tableName="FEATURE_TOGGLE">
+            <column name="NAME">ORDER_CREATE_MASTER_SWITCH</column>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

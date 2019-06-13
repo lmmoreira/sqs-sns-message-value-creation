@@ -1,0 +1,12 @@
+@Library('jenkins-pipeline-library@master')
+def standardPipeline = null
+
+k8sJavaPipeline {
+  buildWith = 'maven:3.6.0-jdk-11'
+  buildCommand = 'mvn -B clean deploy -Prelease -Dsurefire.useSystemClassLoader=false'
+  serviceName = 'fleet-order-acceptance'
+  javaVersion = 11
+  deployType = 'rolling'
+  elbName = 'dev-fleet-order-acceptance'
+  applicationName = 'fleet-order-acceptance-application'
+}
