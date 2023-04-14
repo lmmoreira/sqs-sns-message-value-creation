@@ -33,7 +33,7 @@
         <delivery-platform-gis-sdk>0.0.31+20190109.34</delivery-platform-gis-sdk>
 
         <aws-java-sdk-sqs.version>1.11.529</aws-java-sdk-sqs.version>
-        <json.version>20180130</json.version>
+        <json.version>20230227</json.version>
         <logstash-layout.version>0.11</logstash-layout.version>
         <disruptor.version>3.4.2</disruptor.version>
         <spring-cloud.version>Greenwich.SR1</spring-cloud.version>
